@@ -45,11 +45,11 @@ class MyBMWAuthentication {
         switch self.region {
         case .NORTH_AMERICA, .REST_OF_WORLD:
             // Try logging in with refresh token first
-            if let refresh_token = self.refresh_token {
+            if self.refresh_token != nil {
                 token_data = await self.refresh_token_row_na()
-                if token_data == nil {
-                    token_data = await self.login_row_na()
-                }
+            }
+            if token_data == nil {
+                token_data = try? await self.login_row_na()
             }
         }
         self.access_token = token_data?.access_token
@@ -70,8 +70,14 @@ class MyBMWAuthentication {
     // MARK: - Region Based Login Methods
     
     /// Login to Rest of World and North America.
-    private func login_row_na() async -> MyBMWTokenData? {
-        nil
+    private func login_row_na() async throws -> MyBMWTokenData? {
+        let client = MyBMWLoginClient(self.region)
+        var headers = client.constants.correlationId
+        headers["ocp-apim-subscription-key"] = client.constants.ocpApimKey
+        headers["bmw-session-id"] = UUID().uuidString
+        let request = MyBMWRequest(method: .get, endpoint: .oAuthConfiguration, headers: headers)
+        try await client.send(request)
+        return nil
     }
 
     private func login_china() async -> MyBMWTokenData? {

@@ -49,13 +49,23 @@ struct MyBMWConstants {
         return "android(TQ2A.230405.003.B2);\(carBrand.rawValue);\(appVersion);\(region.rawValue)"
     }
     
+    /// Generate corrlation headers.
+    var correlationId: [String: String] {
+        let id = UUID().uuidString
+        return [
+            "x-identity-provider": "gcdm",
+            "x-correlation-id": id,
+            "bmw-correlation-id": id,
+        ]
+    }
+    
     // MARK: - URL Related Constants
     
     /// Get the url of the server for the region.
-    var serverURL: String {
+    var serverURL: URL {
         switch region {
-        case .NORTH_AMERICA: "https://cocoapi.bmwgroup.us"
-        case .REST_OF_WORLD: "https://cocoapi.bmwgroup.com"
+        case .NORTH_AMERICA: URL(string: "https://cocoapi.bmwgroup.us")!
+        case .REST_OF_WORLD: URL(string: "https://cocoapi.bmwgroup.com")!
         //case .CHINA: "myprofile.bmw.com.cn"
         }
     }
