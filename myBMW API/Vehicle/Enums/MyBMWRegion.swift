@@ -12,7 +12,7 @@ enum MyBMWRegion: String {
     case REST_OF_WORLD = "row"
     //case CHINA = "cn"
 
-    func toString() -> String {
+    var formattedName: String {
         switch self {
         case .NORTH_AMERICA: "North America"
         case .REST_OF_WORLD: "Rest of the World"

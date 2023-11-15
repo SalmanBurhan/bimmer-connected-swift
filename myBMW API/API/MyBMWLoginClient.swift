@@ -14,6 +14,7 @@ class MyBMWLoginClient {
     init(_ region: MyBMWRegion) {
         self.constants = MyBMWConstants(carBrand: .BMW, region: region)
         self.session = URLSession(configuration: .default)
+        self.configureSession()
     }
     
     internal func configureSession() {
