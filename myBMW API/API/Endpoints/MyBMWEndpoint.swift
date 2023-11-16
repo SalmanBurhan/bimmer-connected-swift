@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol MyBMWBaseableEndpoint: Equatable {
+public protocol MyBMWBaseableEndpoint: Equatable {
     static var base: Self { get }
     var path: String { get }
 }

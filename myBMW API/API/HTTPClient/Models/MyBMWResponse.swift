@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct MyBMWResponse<T> {
+public struct MyBMWResponse<T: Decodable> {
     public let value: T
     public let response: URLResponse
     public let data: Data

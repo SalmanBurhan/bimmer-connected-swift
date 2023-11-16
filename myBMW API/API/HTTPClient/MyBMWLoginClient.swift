@@ -31,11 +31,11 @@ public actor MyBMWLoginClient {
     }
     
     public func makeURLRequest<T>(for request: MyBMWRequest<T>) async throws -> URLRequest {
-        let url = self.constants.serverURL.appending(path: request.path)
+        let url = request.isPathRequest ? self.constants.serverURL.appending(path: request.path!) : request.url!
         var urlRequest = URLRequest(url: url)
         urlRequest.allHTTPHeaderFields = request.headers
         urlRequest.httpMethod = request.method.rawValue
-        
+        urlRequest.httpBody = request.body
         if urlRequest.value(forHTTPHeaderField: "Accept") == nil {
             urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
         }

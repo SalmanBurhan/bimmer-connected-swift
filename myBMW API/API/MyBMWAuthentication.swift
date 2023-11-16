@@ -72,26 +72,43 @@ class MyBMWAuthentication {
     /// Login to Rest of World and North America.
     private func login_row_na() async throws -> MyBMWTokenData? {
         let client = MyBMWLoginClient(self.region)
-        /// Get OAuth2 settings from BMW API.
-        let oAuth2Settings = try await self.oAuth2Settings(with: client).value
+        /// Get OpenID Connect Configuration Document from BMW API.
+        let openIDConfig = try await self.openIDConnectDocument(with: client).value
         /// Generate OAuth2 Code Challenge + State
         let codeVerifier = MyBMWUtils.generateToken(length: 86)
         let codeChallenge = MyBMWUtils.createS256CodeChallenge(from: codeVerifier)
         let state = MyBMWUtils.generateToken(length: 22)
-        
         /// Set up authenticate endpoint.
-        let authenticationURL = oAuth2Settings.tokenEndpoint
-
+        guard let authenticationURL = URL(string:openIDConfig.tokenEndpoint.replacingOccurrences(of: "/token", with: "/authenticate"))
+        else { return nil }
+        let oAuth2Settings = MyBMWOAuth2Settings(from: openIDConfig, state: state, codeChallenge: codeChallenge)
+        /// Call authenticate endpoint first time (with user/pw) and get authentication
+        let authorization = try await self.authenticate(with: client, url: authenticationURL, settings: oAuth2Settings)
+        print(authorization)
         return nil
     }
     
-    /// Get OAuth2 settings from BMW API.
-    private func oAuth2Settings(with client: MyBMWLoginClient) async throws -> MyBMWResponse<MyBMWOAuth2Settings> {
+    /// Get OpenID Connect Configuration Document from BMW API.
+    private func openIDConnectDocument(with client: MyBMWLoginClient) async throws -> MyBMWResponse<MyBMWOpenIDConnectConfig> {
         var headers = MyBMWUtils.generateCorrelationHeaders()
         headers["ocp-apim-subscription-key"] = client.constants.ocpApimKey
         headers["bmw-session-id"] = UUID().uuidString
-        return try await client.send(MyBMWRequest<MyBMWOAuth2Settings>(
+        return try await client.send(MyBMWRequest<MyBMWOpenIDConnectConfig>(
             endpoint: .oAuthConfiguration, method: .get, headers: headers))
+    }
+    
+    /// Call authenticate endpoint first time (with user/pw) and get authentication
+    private func authenticate(with client: MyBMWLoginClient, url: URL, settings: MyBMWOAuth2Settings) async throws -> MyBMWResponse<MyBMWAuthorization> {
+        let body = [
+            URLQueryItem(name: "grant_type", value: "authorization_code"),
+            URLQueryItem(name: "username", value: self.username),
+            URLQueryItem(name: "password", value: self.password)
+        ]
+        var components = URLComponents()
+        components.queryItems = settings.asQueryItems() + body
+        let encodedBody = components.percentEncodedQuery?.data(using: .utf8)
+        return try await client.send(MyBMWRequest<MyBMWAuthorization>(
+            url: url, method: .post, body: encodedBody))
     }
 
     private func login_china() async -> MyBMWTokenData? {

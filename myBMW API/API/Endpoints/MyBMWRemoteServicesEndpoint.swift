@@ -13,7 +13,7 @@ public enum MyBMWRemoteServiceEndpoint: MyBMWBaseableEndpoint {
     case status(String)
     case position(String)
     
-    var path: String {
+    public var path: String {
         return switch self {
         case .base: "/eadrax-vrccs/v3/presentation/remote-commands"
         case .service(let vin, let serviceType): "/\(vin)/\(serviceType)"

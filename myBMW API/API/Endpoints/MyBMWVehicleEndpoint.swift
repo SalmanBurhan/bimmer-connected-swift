@@ -13,7 +13,7 @@ public enum MyBMWVehicleEndpoint: MyBMWBaseableEndpoint {
     case image(vin: String, view: String)
     case pointOfInterest
     
-    var path: String {
+    public var path: String {
         switch self {
         case .base: "/eadrax-vcs/v4/vehicles"
         case .state: "/state"

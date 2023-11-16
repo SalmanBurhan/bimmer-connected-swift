@@ -17,7 +17,7 @@ public enum MyBMWChargingEndpoint: MyBMWBaseableEndpoint {
     case statistics
     case sessions
     
-    var path: String {
+    public var path: String {
         switch self {
         case .base: "/eadrax-crccs/v1/vehicles"
         case .settings(let vin): "/\(vin)/charging-settings"
