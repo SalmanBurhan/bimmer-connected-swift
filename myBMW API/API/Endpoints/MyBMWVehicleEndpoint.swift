@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MyBMWVehicleEndpoint: MyBMWBaseableEndpoint {
+public enum MyBMWVehicleEndpoint: MyBMWBaseableEndpoint {
     case base
     case state
     case image(vin: String, view: String)

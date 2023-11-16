@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MyBMWChargingEndpoint: MyBMWBaseableEndpoint {
+public enum MyBMWChargingEndpoint: MyBMWBaseableEndpoint {
     case base
     case settings(vin: String)
     case profile(vin: String)

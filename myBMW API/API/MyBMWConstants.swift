@@ -48,17 +48,7 @@ struct MyBMWConstants {
     var xUserAgent: String {
         return "android(TQ2A.230405.003.B2);\(carBrand.rawValue);\(appVersion);\(region.rawValue)"
     }
-    
-    /// Generate corrlation headers.
-    var correlationId: [String: String] {
-        let id = UUID().uuidString
-        return [
-            "x-identity-provider": "gcdm",
-            "x-correlation-id": id,
-            "bmw-correlation-id": id,
-        ]
-    }
-    
+        
     // MARK: - URL Related Constants
     
     /// Get the url of the server for the region.

@@ -72,12 +72,26 @@ class MyBMWAuthentication {
     /// Login to Rest of World and North America.
     private func login_row_na() async throws -> MyBMWTokenData? {
         let client = MyBMWLoginClient(self.region)
-        var headers = client.constants.correlationId
+        /// Get OAuth2 settings from BMW API.
+        let oAuth2Settings = try await self.oAuth2Settings(with: client).value
+        /// Generate OAuth2 Code Challenge + State
+        let codeVerifier = MyBMWUtils.generateToken(length: 86)
+        let codeChallenge = MyBMWUtils.createS256CodeChallenge(from: codeVerifier)
+        let state = MyBMWUtils.generateToken(length: 22)
+        
+        /// Set up authenticate endpoint.
+        let authenticationURL = oAuth2Settings.tokenEndpoint
+
+        return nil
+    }
+    
+    /// Get OAuth2 settings from BMW API.
+    private func oAuth2Settings(with client: MyBMWLoginClient) async throws -> MyBMWResponse<MyBMWOAuth2Settings> {
+        var headers = MyBMWUtils.generateCorrelationHeaders()
         headers["ocp-apim-subscription-key"] = client.constants.ocpApimKey
         headers["bmw-session-id"] = UUID().uuidString
-        let request = MyBMWRequest(method: .get, endpoint: .oAuthConfiguration, headers: headers)
-        try await client.send(request)
-        return nil
+        return try await client.send(MyBMWRequest<MyBMWOAuth2Settings>(
+            endpoint: .oAuthConfiguration, method: .get, headers: headers))
     }
 
     private func login_china() async -> MyBMWTokenData? {

@@ -12,7 +12,7 @@ protocol MyBMWBaseableEndpoint: Equatable {
     var path: String { get }
 }
                                   
-enum MyBMWEndpoint {    
+public enum MyBMWEndpoint {    
     case oAuthConfiguration
         
     case Vehicle(MyBMWVehicleEndpoint)

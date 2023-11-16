@@ -8,28 +8,30 @@
 import Foundation
 
 public actor MyBMWLoginClient {
+    
     let constants: MyBMWConstants
     let session: URLSession
+    let baseURL: URL
+    let encoder: JSONEncoder
+    let decoder: JSONDecoder
     
     init(_ region: MyBMWRegion) {
         self.constants = MyBMWConstants(carBrand: .BMW, region: region)
-        self.session = URLSession(configuration: .default, delegate: MyBMWHTTPLoginClientDelegate(), delegateQueue: nil)
-        self.session.configuration.timeoutIntervalForResource = 30 /// Seconds
-        self.session.configuration.httpAdditionalHeaders = [
-            "User-Agent": self.constants.userAgent,
-            "X-User-Agent": self.constants.xUserAgent
-        ]
+        self.baseURL = self.constants.serverURL
+        let delegate = MyBMWHTTPLoginClientDelegate()
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForResource = 30 /// Seconds
+        configuration.httpAdditionalHeaders = ["User-Agent": self.constants.userAgent,
+                                               "X-User-Agent": self.constants.xUserAgent]
+        self.session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
+        self.decoder = JSONDecoder()
+        self.decoder.dateDecodingStrategy = .iso8601
+        self.encoder = JSONEncoder()
+        self.encoder.dateEncodingStrategy = .iso8601
     }
-        
-    func send(_ request: MyBMWRequest) async throws {
-        let urlRequest = try await makeRequest(for: request)
-        let (data, response) = try await self.session.data(for: urlRequest)
-        print(data, response)
-    }
-
     
-    private func makeRequest(for request: MyBMWRequest) async throws -> URLRequest {
-        let url = self.constants.serverURL.appending(path: request.endpoint.path)
+    public func makeURLRequest<T>(for request: MyBMWRequest<T>) async throws -> URLRequest {
+        let url = self.constants.serverURL.appending(path: request.path)
         var urlRequest = URLRequest(url: url)
         urlRequest.allHTTPHeaderFields = request.headers
         urlRequest.httpMethod = request.method.rawValue
@@ -40,7 +42,26 @@ public actor MyBMWLoginClient {
         
         return urlRequest
     }
-
+    
+    public func send<T: Decodable>(_ request: MyBMWRequest<T>) async throws -> MyBMWResponse<T> {
+        let response = try await response(for: request)
+        let value: T = try self.decoder.decode(T.self, from: response.data)
+        return MyBMWResponse(value: value, response: response.urlResponse, data: response.data)
+    }
+    
+    public func response<T>(for request: MyBMWRequest<T>) async throws -> (data: Data, urlResponse: URLResponse) {
+        let urlRequest = try await makeURLRequest(for: request)
+        let (data, response) = try await self.session.data(for: urlRequest)
+        try self.validate(response)
+        return (data, response)
+    }
+    
+    private func validate(_ response: URLResponse) throws {
+        guard let httpResponse = response as? HTTPURLResponse
+        else { throw URLError(.badServerResponse) }
+        guard httpResponse.statusCode == 200
+        else { throw MyBMWError.unacceptableResponseCode(self, code: httpResponse.statusCode, url: response.url) }
+    }
 }
 
 class MyBMWHTTPLoginClientDelegate: NSObject, URLSessionDelegate, URLSessionDataDelegate {

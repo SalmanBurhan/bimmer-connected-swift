@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MyBMWRemoteServiceEndpoint: MyBMWBaseableEndpoint {
+public enum MyBMWRemoteServiceEndpoint: MyBMWBaseableEndpoint {
     case base
     case service(vin: String, serviceType: String)
     case status(String)

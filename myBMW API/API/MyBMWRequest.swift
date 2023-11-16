@@ -7,15 +7,26 @@
 
 import Foundation
 
-public enum HTTPMethod: String {
+public enum HTTPMethod: String, Sendable {
     case get
     case post
 }
 
-public struct MyBMWRequest {
-    var method: HTTPMethod
-    var endpoint: MyBMWEndpoint
-    var headers: [String: String]?
-    var query: [String: String]?
-    var body: Encodable?
+public struct MyBMWRequest<Response>: Sendable {
+    public let method: HTTPMethod
+    public let path: String
+    public var headers: [String: String]?
+    public var query: [String: String]?
+    
+    init(
+        endpoint: MyBMWEndpoint,
+        method: HTTPMethod,
+        headers: [String : String]? = nil,
+        query: [String : String]? = nil
+    ) {
+        self.method = method
+        self.path = endpoint.path
+        self.headers = headers
+        self.query = query
+    }
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MyBMWChargingService: String {
+public enum MyBMWChargingService: String {
         
     case updateChargingSettings = "CHARGING_SETTINGS"
     case updateChargingProfile = "CHARGING_PROFILE"
@@ -19,7 +19,7 @@ enum MyBMWChargingService: String {
         }
     }
 
-    enum ChargingOperation: String {
+    public enum ChargingOperation: String {
         case startCharging = "start-charging"
         case stopCharging = "stop-charging"
         

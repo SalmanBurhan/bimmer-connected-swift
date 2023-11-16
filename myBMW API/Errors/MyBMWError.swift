@@ -11,4 +11,5 @@ enum MyBMWError<T>: Error {
     case invalidInitialization(thrower: T, description: String)
     case decodingError(thrower: T, description: String)
     case maxRequestRetriesExceeded(thrower: T)
+    case unacceptableResponseCode(_ thower: T, code: Int, url: URL?)
 }
