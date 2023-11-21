@@ -7,11 +7,6 @@
 
 import Foundation
 
-public protocol MyBMWBaseableEndpoint: Equatable {
-    static var base: Self { get }
-    var path: String { get }
-}
-                                  
 public enum MyBMWEndpoint {    
     case oAuthConfiguration
         

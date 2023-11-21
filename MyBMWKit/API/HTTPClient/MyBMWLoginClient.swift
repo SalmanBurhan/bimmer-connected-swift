@@ -12,7 +12,6 @@ public actor MyBMWLoginClient {
     let constants: MyBMWConstants
     let session: URLSession
     let baseURL: URL
-    let encoder: JSONEncoder
     let decoder: JSONDecoder
     
     init(_ region: MyBMWRegion) {
@@ -26,8 +25,6 @@ public actor MyBMWLoginClient {
         self.session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
         self.decoder = JSONDecoder()
         self.decoder.dateDecodingStrategy = .iso8601
-        self.encoder = JSONEncoder()
-        self.encoder.dateEncodingStrategy = .iso8601
     }
     
     public func makeURLRequest<T>(for request: MyBMWRequest<T>) async throws -> URLRequest {
@@ -49,6 +46,22 @@ public actor MyBMWLoginClient {
         return MyBMWResponse(value: value, response: response.urlResponse, data: response.data)
     }
     
+    public func captureRedirect<T>(_ request: MyBMWRequest<T>) async throws -> URL {
+        let urlRequest = try await makeURLRequest(for: request)
+        do {
+            let (_, response) = try await self.session.data(for: urlRequest)
+            try self.validate(response, expectedStatusCode: 302)
+            guard let redirectionURL = response.url
+            else { throw URLError(.redirectToNonExistentLocation) }
+            return redirectionURL
+        } catch let error as URLError {
+            guard error.code == .unsupportedURL,
+                  let redirectionURL = error.userInfo[NSURLErrorFailingURLErrorKey] as? URL
+            else { throw error }
+            return redirectionURL
+        }
+    }
+    
     public func response<T>(for request: MyBMWRequest<T>) async throws -> (data: Data, urlResponse: URLResponse) {
         let urlRequest = try await makeURLRequest(for: request)
         let (data, response) = try await self.session.data(for: urlRequest)
@@ -56,10 +69,10 @@ public actor MyBMWLoginClient {
         return (data, response)
     }
     
-    private func validate(_ response: URLResponse) throws {
+    private func validate(_ response: URLResponse, expectedStatusCode: Int = 200) throws {
         guard let httpResponse = response as? HTTPURLResponse
         else { throw URLError(.badServerResponse) }
-        guard httpResponse.statusCode == 200
+        guard httpResponse.statusCode == expectedStatusCode
         else { throw MyBMWError.unacceptableResponseCode(self, code: httpResponse.statusCode, url: response.url) }
     }
 }
@@ -79,7 +92,7 @@ class MyBMWHTTPLoginClientDelegate: NSObject, URLSessionDelegate, URLSessionData
         }
         completionHandler(.allow)
     }
-    
+        
     private func handle429Response(completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
         guard retriesLeft > 0 else {
             completionHandler(.allow)

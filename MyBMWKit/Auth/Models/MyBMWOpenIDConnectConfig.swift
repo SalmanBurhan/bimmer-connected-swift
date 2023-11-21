@@ -13,13 +13,13 @@ public struct MyBMWOpenIDConnectConfig: Decodable {
     public let clientName: String
     public let clientSecret: String
     public let clientID: String
-    public let gcdmBaseURL: String
-    public let returnURL: String
+    public let gcdmBaseURL: URL
+    public let returnURL: URL
     public let brand: String
     public let language: String
     public let country: String
-    public let authorizationEndpoint: String
-    public let tokenEndpoint: String
+    public let authorizationEndpoint: URL
+    public let tokenEndpoint: URL
     public let scopes: [String]
     public let promptValues: [String]
 
@@ -42,13 +42,13 @@ public struct MyBMWOpenIDConnectConfig: Decodable {
         clientName: String,
         clientSecret: String,
         clientID: String,
-        gcdmBaseURL: String,
-        returnURL: String,
+        gcdmBaseURL: URL,
+        returnURL: URL,
         brand: String,
         language: String,
         country: String,
-        authorizationEndpoint: String,
-        tokenEndpoint: String,
+        authorizationEndpoint: URL,
+        tokenEndpoint: URL,
         scopes: [String],
         promptValues: [String]
     ) {
