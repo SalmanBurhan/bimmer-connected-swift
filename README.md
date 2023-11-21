@@ -58,9 +58,17 @@ dependencies: [
 ### Usage
 ``` swift
 import MyBMWKit
-
 // TODO
 ```
+
+<!-- LICENSE -->
+### License
+The myBMWKit library is licensed under the Apache License 2.0.
+
+<!-- DISCLAIMER -->
+### Disclaimer
+This library is not affiliated with or endorsed by BMW Group or any of its subsidaries.
+
 [platform-shield]: https://img.shields.io/badge/platform-iOS-orange?style=for-the-badge&logo=swift&logoColor=white
 [ios-shield]: https://img.shields.io/badge/iOS-16-teal?style=for-the-badge&logo=apple&logoColor=white
 [forks-shield]: https://img.shields.io/github/forks/SalmanBurhan/bimmer-connected-swift.svg?style=for-the-badge
